@@ -1,0 +1,6 @@
+/*
+!.gitignore
+# Memorize
+!/Memorize
+/Memorize/*/*
+!*.swift

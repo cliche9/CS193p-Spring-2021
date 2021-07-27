@@ -8,59 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
-    // 观测viewModel, if something changed, rebuild the ContentView
+    // observing viewModel, if something changed, rebuild the ContentView
     @ObservedObject var viewModel: EmojiMemoryGame
-// 设置枚举类型符合CaseIterable协议, 可以使用allCases进行枚举
-//    enum Theme: CaseIterable {
-//        case animals, vehicles, fruits
-//
-//        var title: String {
-//            switch self {
-//                case .animals:
-//                    return "Animals"
-//                case .vehicles:
-//                    return "Vehicles"
-//                default:
-//                    return "Fruits"
-//            }
-//        }
-//
-//        var emojis: [String] {
-//            switch self {
-//                case .animals:
-//                    return ["🐶", "🐮", "🐴", "🐱", "🐒", "🐔", "🦄", "🐤", "🐧", "🐭"]
-//                case .vehicles:
-//                    return ["🚗", "🚄", "🚲", "🚌", "🚑", "🚓", "🛵", "🏍️", "🚀", "🚢", "✈️"]
-//                default:
-//                    return ["🍎", "🍌", "🍊", "🍐", "🍋", "🍉", "🍑", "🍒", "🍍", "🥭", "🥝", "🫐", "🍓"]
-//            }
-//        }
-//
-//        var initCount: Int {
-//            return Int.random(in: emojis.count / 2 ..< emojis.count)
-//        }
-//
-//        var systemName: String {
-//            switch self {
-//                case .animals:
-//                    return "hare"
-//                case .vehicles:
-//                    return "car"
-//                default:
-//                    return "applelogo"
-//            }
-//        }
-//    }
-//
+
     var body: some View {
         // Vertical Stack: 垂直布局
         // Horizontal Stack: 水平布局
         VStack {
+            // title
             HStack {
-                Text(EmojiMemoryGame.chosenTheme.name)
-                    .font(.title)
+                Text(viewModel.themeName)
+                    .font(.largeTitle)
             }
-            
+            // body content
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 65, maximum: 100))]) {
                     ForEach(viewModel.cards) { card in
@@ -72,65 +32,25 @@ struct ContentView: View {
                     }
                 }
             }
+            .foregroundColor(viewModel.themeColor)
             
+            // footer: provide functions and info
             HStack {
                 Button(action: {
-                    viewModel.themeSwitch()
+                    viewModel.newGame()
                 }, label: {
                     HStack {
                         Text("New Game")
                         Image(systemName: "power")
                     }
-                    .font(.title)
                 })
+                Spacer()
+                Text("Score: \(viewModel.score)")
             }
-//            HStack {
-//                remove
-//                ForEach(Theme.allCases, id: \.self, content: { theme in
-//                    Button(action: {
-//                        // 切换主题时发生事件
-//                        chosenTheme = theme
-//                        emojiCount = theme.initCount
-//                        emojis = chosenTheme.emojis.shuffled()
-//                    }, label: {
-//                        VStack {
-//                            Image(systemName: theme.systemName)
-//                            Text(theme.title).font(.caption)
-//                        }
-//                    })
-//                    .frame(maxWidth: .infinity)
-//                    // 设置Button的最大宽度, 为.infinity不限制, 自动填满
-//                })
-//                add
-//            }
-//            .font(.title)
-//            .padding(.horizontal)
+            .font(.title)
         }
-        .foregroundColor(EmojiMemoryGame.chosenTheme.color)
         .padding()
     }
-    
-//    var remove: some View {
-//        Button(action: {
-//            if emojiCount > 1 {
-//                emojiCount -= 1
-//            }
-//        }, label: {
-//            Image(systemName: "minus.circle")
-//        })
-//        .font(.title)
-//    }
-//
-//    var add: some View {
-//        Button(action: {
-//            if emojiCount < chosenTheme.emojis.count {
-//                emojiCount += 1
-//            }
-//        }, label: {
-//            Image(systemName: "plus.circle")
-//        })
-//        .font(.title)
-//    }
 }
   
 struct CardView: View {
@@ -159,6 +79,7 @@ struct ContentView_Previews: PreviewProvider {
         let game = EmojiMemoryGame()
         ContentView(viewModel: game)
             .preferredColorScheme(.light)
+        // dark mode
         ContentView(viewModel: game)
             .preferredColorScheme(.dark)
     }

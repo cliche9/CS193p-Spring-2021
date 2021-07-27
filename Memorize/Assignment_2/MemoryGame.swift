@@ -16,82 +16,39 @@ import Foundation
 // functional programming: 使用function作为参数
 // 嵌套struct: 规定了命名空间
 struct MemoryGame<CardContent> where CardContent: Equatable {
-    enum Theme {
-        case Halloween
-        case Animal
-        case Vehicle
-        case Fruit
-        case Sport
-        case Food
-        
-        var emojis: [String] {
-            switch self {
-                case .Halloween:
-                    return ["👻", "💀", "☠️", "🎃", "😱", "😈", "🕷", "🕸", "🦇", "👹"]
-                case .Animal:
-                    return ["🐶", "🐱", "🐹", "🐰", "🐻", "🐼", "🐮", "🐵", "🐤", "🐔", "🐧", "🐴"]
-                case .Vehicle:
-                    return ["🚗", "🚕", "🚌", "🚓", "🚑", "🚜", "🛵", "🚲", "🚄", "✈️", "🚀", "🛳", "🚝"]
-                case .Fruit:
-                    return ["🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍓", "🫐", "🍈", "🍒", "🍑", "🍍", "🥝", "🥑"]
-                case .Sport:
-                    return ["⚽️", "🏀", "🏈", "⚾️", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱", "🪀", "🏓", "🏸"]
-                case .Food:
-                    return ["🍞", "🍔", "🍟", "🍕", "🍗", "🍖", "🌭", "🌮", "🍤", "🍣", "🎂", "🍥"]
-            }
-        }
-        
-        var color: Color {
-            switch self {
-                case .Halloween:
-                    return .gray
-                case .Animal:
-                    return .blue
-                case .Vehicle:
-                    return .red
-                case .Fruit:
-                    return .green
-                case .Sport:
-                    return .purple
-                case .Food:
-                    return .orange
-            }
-        }
-        
-        var name: String {
-            switch self {
-                case .Halloween:
-                    return "Halloween"
-                case .Animal:
-                    return "Animal"
-                case .Vehicle:
-                    return "Vehicle"
-                case .Fruit:
-                    return "Fruit"
-                case .Sport:
-                    return "Sport"
-                case .Food:
-                    return "Food"
-            }
-        }
-    }
-    
     private(set) var cards: Array<Card>
     private var indexOfTheOneAndOnlyFaceUpCard: Int?
+    private(set) var score = 0
     
     mutating func choose(_ card: Card) {
         if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }),
            !cards[chosenIndex].isFaceUp,
-           !cards[chosenIndex].isMatched {
+           !cards[chosenIndex].isMatched
+        {
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
+                // pair matched
                 if (cards[potentialMatchIndex].content == card.content) {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
+                    score += 2
+                } else {
+                    // previously seen card
+                    if (cards[potentialMatchIndex].isPreviouslySeen) {
+                        score -= 1
+                    }
+                    if (cards[chosenIndex].isPreviouslySeen) {
+                        score -= 1
+                    }
                 }
                 indexOfTheOneAndOnlyFaceUpCard = nil
             } else {
+                // not matched
                 for index in cards.indices {
-                    cards[index].isFaceUp = false
+                    if cards[index].isFaceUp {
+                        // all face up cards have been seen
+                        cards[index].isFaceUp = false
+                        cards[index].isPreviouslySeen = true
+                    }
                 }
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
@@ -107,12 +64,13 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             cards.append(Card(content: content, id: pairIndex * 2))
             cards.append(Card(content: content, id: pairIndex * 2 + 1))
         }
-        cards.shuffle()
+        cards.shuffle()                         // Required Task 13 --- cards should be fully shuffled
     }
     
     struct Card: Identifiable {
         var isFaceUp: Bool = false
         var isMatched: Bool = false
+        var isPreviouslySeen: Bool = false
         var content: CardContent
         let id: Int
     }
